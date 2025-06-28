@@ -1,0 +1,17 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="imdb-sentiment-api",
+    version="0.1.0",
+    packages=find_packages(),
+    python_requires=">=3.9,<3.10",
+    install_requires=[
+        "fastapi==0.95.2",
+        "uvicorn==0.22.0",
+        "numpy==1.24.3",
+        "scikit-learn==1.2.2",
+        "python-multipart==0.0.6",
+        "gunicorn==21.2.0",
+        "typing-extensions==4.7.1",
+    ],
+) 
