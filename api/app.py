@@ -12,17 +12,16 @@ origins = [
     "http://localhost:3000",           # Local development
     "http://localhost:8000",           # Alternative local port
     "https://localhost:3000",          # Secure local development
-    "https://imdb-sentiment-frontend.vercel.app"  # Production frontend (update this)
+    "https://imdb-sentiment-frontend.vercel.app",  # Production frontend (update this)
+    "*"                                # Allow all origins temporarily for testing
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False,  # Changed to False since we're using credentials: 'omit'
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
-    max_age=3600,
 )
 
 # Load models
@@ -45,29 +44,15 @@ async def predict_sentiment(text: str):
         sentiment = "positive" if proba[1] > 0.5 else "negative"
         confidence = float(np.max(proba))
         
-        return JSONResponse(
-            content={
-                "text": text,
-                "sentiment": sentiment,
-                "confidence": confidence,
-                "success": True
-            },
-            headers={
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type",
-            }
-        )
+        return {
+            "text": text,
+            "sentiment": sentiment,
+            "confidence": confidence,
+            "success": True
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/")
 async def health_check():
-    return JSONResponse(
-        content={"status": "healthy"},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-        }
-    )
+    return {"status": "healthy"}

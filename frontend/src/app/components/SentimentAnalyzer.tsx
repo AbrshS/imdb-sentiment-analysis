@@ -22,13 +22,7 @@ export default function SentimentAnalyzer() {
     setError(null);
     
     try {
-      // First, try a health check
-      const healthCheck = await fetch(`${API_URL}/`);
-      if (!healthCheck.ok) {
-        throw new Error('API is not accessible');
-      }
-
-      // If health check passes, make the actual request
+      // Make the actual request directly without health check
       const response = await fetch(
         `${API_URL}/predict?text=${encodeURIComponent(text)}`,
         {
@@ -36,15 +30,15 @@ export default function SentimentAnalyzer() {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
+            'Origin': 'http://localhost:3000'
           },
           mode: 'cors',
-          cache: 'no-cache',
+          credentials: 'omit'
         }
       );
       
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API Error: ${response.status} - ${errorText}`);
+        throw new Error(`API Error: ${response.status}`);
       }
       
       const data = await response.json();
@@ -52,9 +46,7 @@ export default function SentimentAnalyzer() {
     } catch (error) {
       console.error('Error:', error);
       setError(
-        error instanceof Error 
-          ? error.message 
-          : 'Failed to analyze sentiment. Please try again later.'
+        'Failed to analyze sentiment. Please make sure the API is running and accessible.'
       );
     } finally {
       setLoading(false);
