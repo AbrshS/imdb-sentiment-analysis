@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+// Make sure this matches your actual API URL
 const API_URL = 'https://imdb-sentiment-api-b4k.onrender.com';
 
 export default function SentimentAnalyzer() {
@@ -19,27 +20,42 @@ export default function SentimentAnalyzer() {
     
     setLoading(true);
     setError(null);
+    
     try {
+      // First, try a health check
+      const healthCheck = await fetch(`${API_URL}/`);
+      if (!healthCheck.ok) {
+        throw new Error('API is not accessible');
+      }
+
+      // If health check passes, make the actual request
       const response = await fetch(
         `${API_URL}/predict?text=${encodeURIComponent(text)}`,
         {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
           },
           mode: 'cors',
+          cache: 'no-cache',
         }
       );
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
       setResult(data);
     } catch (error) {
       console.error('Error:', error);
-      setError('Failed to analyze sentiment. Please try again later.');
+      setError(
+        error instanceof Error 
+          ? error.message 
+          : 'Failed to analyze sentiment. Please try again later.'
+      );
     } finally {
       setLoading(false);
     }
