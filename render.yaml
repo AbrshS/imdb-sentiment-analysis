@@ -2,11 +2,15 @@ services:
   - type: web
     name: imdb-sentiment-api
     env: python
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
+    buildCommand: |
+      python -m pip install --upgrade pip setuptools wheel
+      pip install -r requirements.txt
     startCommand: cd api && uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
-      - key: POETRY_VERSION
-        value: 1.4.2
+      - key: PIP_DISABLE_PIP_VERSION_CHECK
+        value: "1"
+      - key: PIP_NO_CACHE_DIR
+        value: "1"
     autoDeploy: true 
