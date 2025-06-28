@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 // Make sure this matches your actual API URL
-const API_URL = 'https://imdb-sentiment-api-b4k.onrender.com';
+const API_URL = 'https://imdb-sentiment-api-ib4k.onrender.com';
 
 export default function SentimentAnalyzer() {
   const [text, setText] = useState('');
