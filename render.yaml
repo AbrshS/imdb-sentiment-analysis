@@ -9,4 +9,10 @@ services:
         value: 3.9.12
       - key: PYTHONUNBUFFERED
         value: "true"
+      - key: PIP_DISABLE_PIP_VERSION_CHECK
+        value: "1"
+      - key: SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL
+        value: "True"
+      - key: PORT
+        value: "10000"
     autoDeploy: true 
