@@ -28,10 +28,16 @@ export default function SentimentAnalyzer() {
         headers: {
           'Accept': 'application/json',
         },
+        mode: 'cors'  // Add explicit CORS mode
       });
       
       if (!healthCheck.ok) {
         throw new Error('API is not accessible');
+      }
+
+      const healthData = await healthCheck.json();
+      if (!healthData.models_loaded) {
+        throw new Error('API models are not loaded');
       }
       
       // Make the sentiment analysis request
@@ -42,7 +48,8 @@ export default function SentimentAnalyzer() {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-          }
+          },
+          mode: 'cors'  // Add explicit CORS mode
         }
       );
       
@@ -65,6 +72,14 @@ export default function SentimentAnalyzer() {
         } else if (error.message.includes('API is not accessible')) {
           setError(
             'The API service is currently unavailable. Please try again later.'
+          );
+        } else if (error.message.includes('API models are not loaded')) {
+          setError(
+            'The API models are not properly loaded. Please contact support.'
+          );
+        } else if (error.message.includes('blocked by CORS')) {
+          setError(
+            'Cross-Origin Resource Sharing (CORS) error. Please check API configuration.'
           );
         } else {
           setError(

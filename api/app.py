@@ -26,16 +26,29 @@ app.add_middleware(
 # Load models
 MODEL_PATH = Path(__file__).parent / "models"
 
-with open(MODEL_PATH / "vectorizer.pkl", "rb") as f:
-    vectorizer = pickle.load(f)
+try:
+    with open(MODEL_PATH / "vectorizer.pkl", "rb") as f:
+        vectorizer = pickle.load(f)
 
-with open(MODEL_PATH / "model.pkl", "rb") as f:
-    model = pickle.load(f)
+    with open(MODEL_PATH / "model.pkl", "rb") as f:
+        model = pickle.load(f)
+except Exception as e:
+    print(f"Error loading models: {str(e)}")
+    # Initialize empty models - this will cause the endpoints to return errors
+    # but at least the server will start
+    vectorizer = None
+    model = None
 
 @app.get("/predict")
 async def predict_sentiment(text: str):
     if not text:
         raise HTTPException(status_code=400, detail="Text cannot be empty")
+    
+    if vectorizer is None or model is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Model files not loaded. Please check server logs."
+        )
     
     try:
         text_vec = vectorizer.transform([text])
@@ -54,4 +67,7 @@ async def predict_sentiment(text: str):
 
 @app.get("/")
 async def health_check():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "models_loaded": vectorizer is not None and model is not None
+    }
