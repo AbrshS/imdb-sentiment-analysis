@@ -22,7 +22,19 @@ export default function SentimentAnalyzer() {
     setError(null);
     
     try {
-      // Make the actual request directly without health check
+      // First check if the API is accessible
+      const healthCheck = await fetch(`${API_URL}/`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (!healthCheck.ok) {
+        throw new Error('API is not accessible');
+      }
+      
+      // Make the sentiment analysis request
       const response = await fetch(
         `${API_URL}/predict?text=${encodeURIComponent(text)}`,
         {
@@ -30,24 +42,38 @@ export default function SentimentAnalyzer() {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Origin': 'http://localhost:3000'
-          },
-          mode: 'cors',
-          credentials: 'omit'
+          }
         }
       );
       
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+        const errorData = await response.text();
+        throw new Error(
+          `API Error: ${response.status} - ${errorData || response.statusText}`
+        );
       }
       
       const data = await response.json();
       setResult(data);
     } catch (error) {
       console.error('Error:', error);
-      setError(
-        'Failed to analyze sentiment. Please make sure the API is running and accessible.'
-      );
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          setError(
+            'Unable to connect to the API. Please check your internet connection and try again.'
+          );
+        } else if (error.message.includes('API is not accessible')) {
+          setError(
+            'The API service is currently unavailable. Please try again later.'
+          );
+        } else {
+          setError(
+            `Failed to analyze sentiment: ${error.message}`
+          );
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

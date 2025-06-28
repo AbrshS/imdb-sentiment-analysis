@@ -10,18 +10,17 @@ app = FastAPI()
 # CORS configuration
 origins = [
     "http://localhost:3000",           # Local development
-    "http://localhost:8000",           # Alternative local port
     "https://localhost:3000",          # Secure local development
-    "https://imdb-sentiment-frontend.vercel.app",  # Production frontend (update this)
-    "*"                                # Allow all origins temporarily for testing
+    "https://imdb-sentiment-frontend.vercel.app"  # Production frontend
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=False,  # Changed to False since we're using credentials: 'omit'
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],  # Be specific about allowed methods
+    allow_headers=["Content-Type", "Accept", "Origin"],  # Be specific about allowed headers
+    expose_headers=["Content-Type"]  # Expose necessary headers
 )
 
 # Load models
